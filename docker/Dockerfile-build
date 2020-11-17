@@ -1,0 +1,28 @@
+# Download Ubuntu from docker hub
+FROM core-base
+
+# Creating ssh directory
+RUN mkdir /root/.ssh
+
+# Create known_hosts
+RUN touch /root/.ssh/known_hosts
+RUN ssh-keyscan -H github.com >> root/.ssh/known_hosts
+
+# Copy over private key, and set permissions
+# Warning! Anyone who gets their hands on this image will be able
+# to retrieve this private key file from the corresponding image laye
+COPY ssh/id_rsa     /root/.ssh
+COPY ssh/id_rsa.pub /root/.ssh
+RUN chmod 600 /root/.ssh/id_rsa
+RUN chmod 644 /root/.ssh/id_rsa.pub
+
+# Setting ssh permissions
+RUN eval $(ssh-agent -s) && ssh-add /root/.ssh/id_rsa && ssh -o StrictHostKeyChecking=no git@github.com || true
+
+# Create known_hosts
+RUN touch /root/.ssh/known_hosts
+RUN ssh-keyscan -H github.com >> /root/.ssh/known_hosts
+
+COPY ./entrypoint-build.sh /root
+RUN chmod +x /root/entrypoint-build.sh
+ENTRYPOINT ["/root/entrypoint-build.sh"]

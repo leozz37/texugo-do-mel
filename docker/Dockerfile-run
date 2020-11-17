@@ -1,0 +1,13 @@
+# Download Ubuntu from docker hub
+FROM core-base
+
+WORKDIR /root
+RUN mkdir config log
+COPY ./ServerConfiguration.json /root/config/
+COPY artifacts/core-messaging /root
+COPY entrypoint-run.sh /root
+
+RUN chmod +x ./entrypoint-run.sh
+
+ENTRYPOINT ["./entrypoint-run.sh"]
+CMD ["/bin/sh"]

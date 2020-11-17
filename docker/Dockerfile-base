@@ -1,0 +1,71 @@
+# CORE-MESSAGING DOCKERFILE-BASE
+
+# Download Ubuntu from docker hub
+FROM ubuntu:latest
+
+# Update and upgrade Ubuntu
+RUN apt-get update && apt-get upgrade -y && apt-get install -y libzmq5 git build-essential libssl-dev cmake
+
+# NLOHMANN
+RUN git clone https://github.com/nlohmann/json.git
+RUN mkdir json/build
+WORKDIR json/build
+RUN cmake ..
+RUN make -j4
+RUN make install
+WORKDIR ../../
+RUN rm -r json
+
+# SPDLOG
+RUN git clone https://github.com/gabime/spdlog.git
+RUN mkdir spdlog/build 
+WORKDIR spdlog/build
+RUN cmake ..
+RUN make -j4
+RUN make install
+WORKDIR ../../
+RUN rm -r spdlog
+
+# LIBMZQ
+RUN git clone https://github.com/zeromq/libzmq.git
+RUN mkdir libzmq/build
+WORKDIR libzmq/build
+RUN cmake ..
+RUN make -j4
+RUN make install
+WORKDIR ../../
+RUN rm -r libzmq
+
+# CPPZMQ
+RUN git clone https://github.com/zeromq/cppzmq.git
+RUN mkdir cppzmq/build && cd cppzmq && git checkout v4.5.0 && cd ..
+WORKDIR cppzmq/build
+RUN cmake ..
+RUN make -j4
+RUN make install
+WORKDIR ../../
+RUN rm -r cppzmq
+
+# MONGO-C-DRIVER
+RUN git clone https://github.com/mongodb/mongo-c-driver.git
+WORKDIR mongo-c-driver
+RUN git checkout 1.15.3
+RUN mkdir cmake-build
+RUN apt-get install -y python
+RUN python build/calc_release_version.py 
+WORKDIR cmake-build
+RUN cmake -DCMAKE_INSTALL_PREFIX=/opt/mongo-c-driver/1.15.3 -DMONGOC_ENABLE_SSL=ON ..
+RUN make -j4
+RUN make install
+WORKDIR ../../
+RUN rm -r mongo-c-driver
+
+# MONGO-CXX-DRIVER
+RUN git clone https://github.com/mongodb/mongo-cxx-driver.git --branch releases/stable --depth 1
+WORKDIR mongo-cxx-driver/build
+RUN cmake -DMONGOCXX_ENABLE_SSL=ON -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=/opt/mongo-c-driver/1.15.3 -DCMAKE_INSTALL_PREFIX=/opt/mongo-cxx-driver/3.4.0 ..
+RUN make EP_mnmlstc_core
+RUN make -j4
+RUN make install
+WORKDIR ../../
+RUN rm -r mongo-cxx-driver

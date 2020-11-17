@@ -1,0 +1,24 @@
+{
+  "server": {
+    "port": "5555",
+    "dbConnection": "",
+    "logPath": "log/log.txt"
+  },
+  "routeConfig": [
+    {
+      "AAAAAAA": "3000"
+    },
+    {
+      "BBBBBBB": "3001"
+    },
+    {
+      "CCCCCCC": "3002"
+    },
+    {
+      "DDDDDDD": "3003"
+    },
+    {
+      "EEEEEEE": "3004"
+    }
+  ]
+}
